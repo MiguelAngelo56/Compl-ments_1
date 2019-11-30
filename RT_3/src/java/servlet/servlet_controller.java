@@ -66,12 +66,7 @@ public class servlet_controller extends HttpServlet  {
             System.out.println("Port : " + port + " IP : " + IP);
             
             CSocket = new Socket(IP, port);
-            System.out.println("Connexion ok");
-            
-            
-            
-            
-            
+            System.out.println("Connexion ok"); 
 			
         } catch (IOException ex) 
         {

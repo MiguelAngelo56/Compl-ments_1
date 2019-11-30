@@ -20,15 +20,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.InternetAddress;
 import static servicemailing.ThreadReception.host;
 
 /**
@@ -75,8 +79,8 @@ public class ThreadClient extends Thread{
             prop.put("mail.disable.top", true);
             Session sess = Session.getDefaultInstance(prop, null);
             //Remplacer par les paramètre agent
-            String user = "dossantos";
-            String pwd = "unizuniz1999";
+            String user = a.getUser();
+            String pwd = a.getPassword();
             System.out.println("Obtention d'un objet store");
             Store st = sess.getStore("pop3");
             st.connect(host,user, pwd);
@@ -88,6 +92,9 @@ public class ThreadClient extends Thread{
             int countNewMessage = 0;
             int MessageNumber;
             String reply = "";
+            String Text = "";
+            //Utiliser un listener: pour savoir si il ya des nouveaux messages, envoie de ces messages par socket. --> page 63 java(IV)
+            //soit le store listener ou le count listener(je pense plus au store car celui là va envoyer un par un) --> moins chiant
             while(!isInterrupted())
             {
                 System.out.println("WAIT");
@@ -103,33 +110,26 @@ public class ThreadClient extends Thread{
                 //msg[0].setFlag(Flag.DELETED, true);               
                 for(int i=0; i<countNewMessage; i++)
                 {
-                    System.out.println("Nouveau message");
                     MessageNumber = f.getMessageCount()-(i+1);
-                    if (msg[MessageNumber].isMimeType("text/plain"))
-                    {
-                        //System.out.println("Destinataire : " + msg[i].getReplyTo()[0]);
-                        //System.out.println("Expéditeur : " + msg[i].getFrom()[0]);
-                        if(msg[i].getReplyTo()[0] == null){
-                            reply = "A modifier dans THreadClient du service mailing";
-                        }
-                        else{
-                            reply = msg[i].getReplyTo()[0].toString();
-                        }
-                        Mail mail = new Mail(a.getMail(), reply,(String)msg[MessageNumber].getSubject(),(String)msg[MessageNumber].getContent());
-                        req.setObjectClasse(mail);
-                        req.EnvoieRequete(Sock);
-                        
-                    }
+                    System.out.println("Nouveau message");
+                    Text =(String)msg[MessageNumber].getContent();
+                    reply = InternetAddress.toString(msg[MessageNumber].getRecipients(Message.RecipientType.TO));
+                    Mail mail = new Mail(a.getMail(),reply,(String)msg[MessageNumber].getSubject(), Text, null);
+                    req.setObjectClasse(mail);
+                    req.EnvoieRequete(Sock);
                 }
                 countConnexionMessage = f.getMessageCount();
             }
-            System.out.println("je sors");
-        } catch (IOException | ClassNotFoundException  | SQLException  ex) {
-            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchProviderException ex) {
-            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MessagingException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | ClassNotFoundException  | SQLException  ex) {
+            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+
+
+
+
+
+
         }
     }
     

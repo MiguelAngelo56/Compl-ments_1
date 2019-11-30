@@ -6,6 +6,15 @@
 package applic_checkin;
 
 import ClassesMail.Mail;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.mail.MessagingException;
+import javax.mail.Part;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -25,7 +34,7 @@ public class MailDetailsDialog extends javax.swing.JDialog {
     }
     
     public void setParamMail(){
-         SujetTF.setText(mail.getSujet());
+        SujetTF.setText(mail.getSujet());
         ExpediteurTF.setText(mail.getExpediteur());
         TexteTA.setText(mail.getText());
         DestinataireTF.setText(mail.getDestinataire());
@@ -104,20 +113,22 @@ public class MailDetailsDialog extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(PrenomLayout.createSequentialGroup()
                 .addGroup(PrenomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
                     .addGroup(PrenomLayout.createSequentialGroup()
                         .addGroup(PrenomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
                             .addComponent(jLabel3)
                             .addComponent(jLabel7)
-                            .addComponent(jLabel6))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addGroup(PrenomLayout.createSequentialGroup()
+                                .addGap(2, 2, 2)
+                                .addComponent(jLabel6)))
+                        .addGap(23, 23, 23)
                         .addGroup(PrenomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(DestinataireTF)
                             .addComponent(ExpediteurTF)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 416, Short.MAX_VALUE)
-                            .addComponent(SujetTF)))
-                    .addComponent(jLabel2))
-                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(SujetTF))))
+                .addGap(0, 89, Short.MAX_VALUE))
         );
         PrenomLayout.setVerticalGroup(
             PrenomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -159,7 +170,7 @@ public class MailDetailsDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ExpediteurTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExpediteurTFActionPerformed
-        // TODO add your handling code here:
+       
     }//GEN-LAST:event_ExpediteurTFActionPerformed
 
     /**
@@ -187,6 +198,9 @@ public class MailDetailsDialog extends javax.swing.JDialog {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(MailDetailsDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */

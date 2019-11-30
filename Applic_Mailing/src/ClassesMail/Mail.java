@@ -6,7 +6,9 @@
 package ClassesMail;
 
 import java.io.Serializable;
-
+import java.util.*; 
+import java.io.File;
+import javax.mail.Part;
 /**
  *
  * @author Miguel
@@ -16,6 +18,15 @@ public class Mail implements Serializable{
     private String Destinataire;
     private String Sujet;
     private String Text;
+    private Vector<Part> vect_part = new Vector();
+    
+    public void setVectPart(Vector<Part> e){
+        vect_part = e;
+    }
+    
+    public Vector<Part> getVectPart(){
+        return vect_part;
+    }
     
     public void setExpediteur(String e){
         Expediteur = e;
@@ -54,6 +65,7 @@ public class Mail implements Serializable{
         Destinataire = "";
         Sujet = "";
         Text = "";
+        vect_part = null;
     }
     
     public Mail(String e, String d, String s, String t){
@@ -61,5 +73,14 @@ public class Mail implements Serializable{
         Destinataire = d;
         Sujet = s;
         Text = t;
+        vect_part = null;
+    }
+    
+    public Mail(String e, String d, String s, String t, Vector<Part> vect){
+        Expediteur = e;
+        Destinataire = d;
+        Sujet = s;
+        Text = t;
+        vect_part = vect;
     }
 }

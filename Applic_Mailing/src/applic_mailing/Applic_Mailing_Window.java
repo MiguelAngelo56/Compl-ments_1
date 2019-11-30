@@ -172,6 +172,18 @@ public class Applic_Mailing_Window extends javax.swing.JFrame {
                     break;
                 }
             }
+            if(find == true){
+                if(POP3RB.isSelected()){
+                    Recevoir_Mail rm = new Recevoir_Mail(a);
+                    rm.show();
+                }
+                 else{
+                //envoyer mail
+                    Envoie_Mail em = new Envoie_Mail(a);
+                    em.show();
+                }
+            }
+           
         } catch (SQLException ex) {
             Logger.getLogger(Applic_Mailing_Window.class.getName()).log(Level.SEVERE, null, ex);
         }
