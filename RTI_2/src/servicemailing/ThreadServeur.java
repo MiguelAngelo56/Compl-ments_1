@@ -5,7 +5,6 @@
  */
 package servicemailing;
 
-import ClassesMail.SocketAgent;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -22,7 +21,6 @@ public class ThreadServeur extends Thread{
     private int nbr_client;
     private ServerSocket SSocket = null;
     private Statement instruc;
-    private static Vector<SocketAgent>  Vect_SA = new Vector();
 
     public Statement getInstruc() {
         return instruc;
@@ -41,13 +39,6 @@ public class ThreadServeur extends Thread{
         this.SSocket = SSocket;
     }
 
-    public Vector<SocketAgent> getVect_SA() {
-        return Vect_SA;
-    }
-    
-    public void setVect_SA(Vector<SocketAgent> vsa) {
-        Vect_SA = vsa;
-    }
     
     public ThreadServeur(int p, int nbr_c) 
     {
@@ -75,15 +66,15 @@ public class ThreadServeur extends Thread{
             //Connexion à la base de donnée
             System.out.println("Essai de connexion JDBC");
             Class leDriver= Class.forName("oracle.jdbc.driver.OracleDriver");
-            //Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/ORCL","BD_FERRIES","Damien");
+            Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/ORCL","BD_FERRIES","Damien");
             //Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","RTI","unizuniz1999");
-            Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","RTI2","unizuniz1999");
+            //Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","RTI2","unizuniz1999");
             con.setAutoCommit(false);
             System.out.println("Connexion à la BDD RTI réalisée");
             instruc= con.createStatement();
             System.out.println("Création d'une instance d'instruction pour cette connexion");
             Socket CSocket = null;
-            ThreadReception tr = new ThreadReception();
+            //ThreadReception tr = new ThreadReception();
             //tr.start();
             while (!isInterrupted()) 
             {

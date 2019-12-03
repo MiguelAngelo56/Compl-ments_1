@@ -27,6 +27,7 @@ public class ReponseEBOOP implements Reponse, Serializable{
     public static int ANNULER_ACK = 203;
     public static int TRAVERSEE = 204;
     public static int PORT_ID_NOM = 205;
+    public static int MAIL_AGENT = 206;
     
     
     

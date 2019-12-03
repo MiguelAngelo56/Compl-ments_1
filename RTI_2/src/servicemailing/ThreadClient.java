@@ -8,10 +8,11 @@ package servicemailing;
 import ClassesCIA.Login;
 import ClassesMail.Agent;
 import ClassesMail.Mail;
-import ClassesMail.SocketAgent;
 import ProtocolCIA.ReponseCIA;
 import ProtocolCIA.RequeteCIA;
 import database.facility;
+import static divers.Config_Applic.pathConfig;
+import divers.Persistance_Properties;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -42,9 +43,10 @@ import static servicemailing.ThreadReception.host;
 public class ThreadClient extends Thread{ 
     private Socket Sock;
     private Statement instruc;
+    private Properties myProperties;
     private ThreadServeur ts = new ThreadServeur();
     private Agent a = new Agent();
-    static String host = "10.59.26.134";
+    static String host;
     private RequeteCIA req = new RequeteCIA();
     private ReponseCIA rep = new ReponseCIA();
     
@@ -65,11 +67,16 @@ public class ThreadClient extends Thread{
     {
         try 
         {
+            //recuperation de l'host dans le fichier properties
+            myProperties = Persistance_Properties.LoadProp(pathConfig);
+            host = myProperties.getProperty("host");
+            
             System.out.println("Service Mailing: thread crée : en attente d'un mail");
             Agent a = new Agent();
             
-            System.out.println("Teste de connexion");
+            System.out.println("Test de connexion");
             while((a=TestLogin()).getUser().equals(""));
+            
             
             System.out.println("Connexion réussi");
           
@@ -99,6 +106,7 @@ public class ThreadClient extends Thread{
             {
                 System.out.println("WAIT");
                 //Dès que l'on reçoit un message on lui envoie sous forme de requete
+                
                 while(countConnexionMessage==f.getMessageCount()){
                     f.close(true);
                     f.open(Folder.READ_ONLY);
@@ -110,13 +118,25 @@ public class ThreadClient extends Thread{
                 //msg[0].setFlag(Flag.DELETED, true);               
                 for(int i=0; i<countNewMessage; i++)
                 {
+                    //avec cette methode on recuperera le message du plus recent ou moins recent
+                    //rajouter un if ici qui test si le mail de l'expediteur contient u2.tech.hepl.local
                     MessageNumber = f.getMessageCount()-(i+1);
                     System.out.println("Nouveau message");
-                    Text =(String)msg[MessageNumber].getContent();
-                    reply = InternetAddress.toString(msg[MessageNumber].getRecipients(Message.RecipientType.TO));
-                    Mail mail = new Mail(a.getMail(),reply,(String)msg[MessageNumber].getSubject(), Text, null);
-                    req.setObjectClasse(mail);
-                    req.EnvoieRequete(Sock);
+                    if(msg[MessageNumber].isMimeType("text/plain"))
+                    {
+                        System.out.println("1");
+                        System.out.println("Message en cours : " + MessageNumber);
+                        System.out.println("Message total : " + f.getMessageCount());
+                        Text =(String)msg[MessageNumber].getContent();
+                        System.out.println("2");
+                        reply = InternetAddress.toString(msg[MessageNumber].getRecipients(Message.RecipientType.TO));
+                        System.out.println("3");        
+                        //mail (expediateur, destinataire, sujet, texte)
+                        Mail mail = new Mail(reply,a.getMail(),(String)msg[MessageNumber].getSubject(), Text, null);
+                        req.setObjectClasse(mail);
+                        req.EnvoieRequete(Sock);
+                    }
+
                 }
                 countConnexionMessage = f.getMessageCount();
             }

@@ -26,7 +26,8 @@ public class Service_Mail extends javax.swing.JFrame {
 	/**
 	 * Creates new form Service_Mail
 	 */
-	public Service_Mail() {
+	public Service_Mail() 
+        {
             initComponents();
             myProperties = Persistance_Properties.LoadProp(pathConfig);
             //recuperation du port dans l'objet properties

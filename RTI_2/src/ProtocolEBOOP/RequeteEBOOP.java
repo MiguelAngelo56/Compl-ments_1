@@ -8,6 +8,7 @@ package ProtocolEBOOP;
 
 
 import ClassesEBOOP.Client;
+import ClassesEBOOP.Facture;
 import ClassesEBOOP.Reservation;
 import ClassesEBOOP.Traversee;
 import database.facility;
@@ -43,7 +44,7 @@ public class RequeteEBOOP implements Requete , Serializable{
     public static int CREATION_RES = 7;
     public static int PAIEMENT = 8;
     public static int NOM_PORT = 9;
-
+    public static int FACTURE = 10;
     
     public static int STOP = -1;
     
@@ -123,6 +124,9 @@ public class RequeteEBOOP implements Requete , Serializable{
                     case 9:
                         get_nom_port(s, instruct);
                         break;
+                    case 10:
+                        creation_facture(s, instruct);
+                        break;
                 }
                 this.RecevoirRequete(s);
 
@@ -167,6 +171,22 @@ public class RequeteEBOOP implements Requete , Serializable{
             rep.setTypeRequete(ReponseEBOOP.ANNULER_ACK);
             rep.setObjectClasse(null);
             rep.EnvoieReponse(s);
+    }
+    
+    public void creation_facture (Socket s, Statement instruct) throws SQLException, IOException
+    {        
+        Facture fact = (Facture)getObjectClasse();
+        int id_facture = fact.hashCode();
+        fact.setId_facture(Integer.toString(id_facture));
+        String Champs = ("'"+ fact.getId_facture()  +"', '" + fact.getMontant() + "','" + fact.getId_client() + "','" +  fact.getNom_client() + "','" + fact.getPrenom_client()+ "','" + fact.getNvr_reservation()+ "'");
+        facility.InsertIntoTable("FACTURES", Champs, instruct);
+    
+        ReponseEBOOP rep = new ReponseEBOOP();
+        rep.setTypeRequete(ReponseEBOOP.MAIL_AGENT);
+        Vector<String> vec_mail= new Vector<String>();
+        vec_mail = database.facily_EBOOP.get_all_agent_mail(instruct);
+        rep.setObjectClasse(vec_mail);
+        rep.EnvoieReponse(s);
     }
 
     public void creation_reservation(Socket s, Statement instruct) throws SQLException, IOException{
