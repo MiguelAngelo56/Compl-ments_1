@@ -107,6 +107,7 @@ public class ThreadClient extends Thread{
                 System.out.println("WAIT");
                 //Dès que l'on reçoit un message on lui envoie sous forme de requete
                 
+                //Dès que l'on reçoit un message on lui envoie sous forme de requete test
                 while(countConnexionMessage==f.getMessageCount()){
                     f.close(true);
                     f.open(Folder.READ_ONLY);
