@@ -6,6 +6,8 @@
 package applic_mailing;
 
 import ClassesMail.Agent;
+import static divers.Config_Applic.pathConfig;
+import divers.Persistance_Properties;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -25,14 +27,22 @@ public class Envoie_Mail extends javax.swing.JFrame {
     /**
      * Creates new form Envoie_Mail
      */
-    private static String host = "10.59.26.134";
-    private static String charset = "iso-8859-1"; 
+    //pour le fichier config
+    private Properties myProperties;
+    private static String host;
+    private static String charset; 
+    
     private Properties prop;
     private Session sess;
     Agent agent_connecter;
     Vector<File> attachement = new Vector();
-    public Envoie_Mail(Agent a) {
+    public Envoie_Mail(Agent a) 
+    {
         initComponents();
+        myProperties = Persistance_Properties.LoadProp(pathConfig);
+        host = myProperties.getProperty("host");
+        charset = myProperties.getProperty("charset");
+        
         agent_connecter = a;
         FromTF.setText(agent_connecter.getMail());
         prop = System.getProperties(); 
@@ -194,7 +204,9 @@ public class Envoie_Mail extends javax.swing.JFrame {
             msg.setFrom (new InternetAddress (exp));
             msg.setRecipient (Message.RecipientType.TO, new InternetAddress (dest));
             msg.setSubject(sujet);
-            if(!attachement.isEmpty()){    
+            if(!attachement.isEmpty())
+            {    
+                //signifie qu'il y a une piece jointe
                 System.out.println("Début construction du multipart");
                 Multipart msgMP = new MimeMultipart();
                 // 1ère composante : le texte d'accompagnement
@@ -208,7 +220,7 @@ public class Envoie_Mail extends javax.swing.JFrame {
                         msgBP = new MimeBodyPart();
                         DataSource so = new FileDataSource (attachement.get(i).getPath());
                         msgBP.setDataHandler (new DataHandler (so));
-                        msgBP.setFileName(attachement.get(i).getPath());
+                        msgBP.setFileName(attachement.get(i).getName());
                         msgMP.addBodyPart(msgBP);
                     }
                 }

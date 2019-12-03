@@ -7,11 +7,10 @@ package applic_mailing;
 
 import ClassesMail.Agent;
 import ClassesMail.Mail;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import static divers.Config_Applic.pathConfig;
+import divers.Persistance_Properties;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -24,10 +23,7 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
-import javax.persistence.Table;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 /**
  *
@@ -38,19 +34,29 @@ public class Recevoir_Mail extends javax.swing.JFrame {
     /**
      * Creates new form Recevoir_Mail
      */
+    //pour le fichier config
+    private Properties myProperties;
+    
+    
     Agent agent_connecter;
     Vector<Mail> vect_mail = new Vector();
     Vector<Part> vect_part;
-    String host = "10.59.26.134";
+    String host;
     DefaultTableModel tm = new DefaultTableModel();
     Properties prop = System.getProperties();
     //System.out.println("Création d'une session mail");
     Session sess;
     Store st;
     Folder f;
-    public Recevoir_Mail(Agent a) {
+    
+    public Recevoir_Mail(Agent a) 
+    {
         try {
             initComponents();
+        
+            myProperties = Persistance_Properties.LoadProp(pathConfig);
+            host = myProperties.getProperty("host");
+            
             
             TableauMail.setModel(tm);
             tm.addColumn("From");
@@ -62,6 +68,7 @@ public class Recevoir_Mail extends javax.swing.JFrame {
             agent_connecter = a;
             jLabel4.setText(agent_connecter.getUser());
             jLabel5.setText(agent_connecter.getMail());
+            
             
             prop.put("mail.pop3.host", host);
             prop.put("mail.disable.top", true);
@@ -84,12 +91,17 @@ public class Recevoir_Mail extends javax.swing.JFrame {
     public void RemplirMessage() throws MessagingException, IOException{
         String Text_Part = "";
         Message msg[] = f.getMessages();
-        for(int i = 0; i < msg.length; i++){
+        for(int i = 0; i < msg.length; i++)
+        {
             vect_part = new Vector();
-            if(msg[i].getContentType().equals("text/plain")){
+            if(msg[i].isMimeType("text/plain"))
+            {
                 Text_Part =(String)msg[i].getContent();
-                tm.addRow(new Object[]{agent_connecter.getMail(), InternetAddress.toString(msg[i].getRecipients(Message.RecipientType.TO)), msg[i].getSubject(), Text_Part, "false"});
-            }else{
+                tm.addRow(new Object[]{Arrays.toString(msg[i].getFrom()), agent_connecter.getMail(), msg[i].getSubject(), Text_Part, "false"});
+                //tm.addRow(new Object[]{InternetAddress.toString(msg[i].getRecipients(Message.RecipientType.TO)), agent_connecter.getMail(), msg[i].getSubject(), Text_Part, "false"});
+            }
+            else
+            {
                 Multipart msgMP = (Multipart)msg[i].getContent();
                 int np = msgMP.getCount();
                 Part p = msgMP.getBodyPart(0);
@@ -206,15 +218,16 @@ public class Recevoir_Mail extends javax.swing.JFrame {
                             .addComponent(jLabel5)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel4)
-                                .addGap(35, 35, 35)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel1))))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addComponent(jButton1)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jButton3)
-                            .addGap(49, 49, 49)
-                            .addComponent(jButton2))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jButton2)
+                            .addGap(14, 14, 14))
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(40, Short.MAX_VALUE))
         );
