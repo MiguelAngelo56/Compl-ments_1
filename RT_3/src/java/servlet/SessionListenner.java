@@ -37,17 +37,19 @@ public class SessionListenner implements HttpSessionListener{
         RequeteEBOOP req = new RequeteEBOOP();
         
         CSocket = (Socket)session.getAttribute("socket");
-        
-        if(session.getAttribute("reservation_pay")!=null)
+        if((int)session.getAttribute("OK") != 1)
         {
-            try {
-                vect_res_panier = (Vector<Reservation>) session.getAttribute("reservation_pay");
-                req.setTypeRequete(RequeteEBOOP.ANNULER_RES);
-                req.setObjectClasse(session.getAttribute("reservation_pay"));
-                req.EnvoieRequete(CSocket);
+            if(session.getAttribute("reservation_pay")!=null)
+            {
+                try {
+                    vect_res_panier = (Vector<Reservation>) session.getAttribute("reservation_pay");
+                    req.setTypeRequete(RequeteEBOOP.ANNULER_RES);
+                    req.setObjectClasse(session.getAttribute("reservation_pay"));
+                    req.EnvoieRequete(CSocket);
 
-            } catch (IOException ex) {
-                Logger.getLogger(SessionListenner.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(SessionListenner.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
      

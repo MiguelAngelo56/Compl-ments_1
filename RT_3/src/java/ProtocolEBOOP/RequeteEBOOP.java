@@ -5,9 +5,9 @@
  */
 package ProtocolEBOOP;
 
-
-
+import database.*;
 import ClassesEBOOP.Client;
+import ClassesEBOOP.Facture;
 import ClassesEBOOP.Reservation;
 import ClassesEBOOP.Traversee;
 import database.facility;
@@ -43,6 +43,7 @@ public class RequeteEBOOP implements Requete , Serializable{
     public static int CREATION_RES = 7;
     public static int PAIEMENT = 8;
     public static int NOM_PORT = 9;
+    public static int FACTURE = 10;
 
     
     public static int STOP = -1;
@@ -123,6 +124,9 @@ public class RequeteEBOOP implements Requete , Serializable{
                     case 9:
                         get_nom_port(s, instruct);
                         break;
+                    case 10:
+                        creation_facture(s, instruct);
+                        break;
                 }
                 this.RecevoirRequete(s);
 
@@ -134,41 +138,59 @@ public class RequeteEBOOP implements Requete , Serializable{
         }     
     }
 	
-	public void paiement_serveur_carte(Socket s, Socket s_card,Statement instruct) throws IOException, ClassNotFoundException{
-		Vector<Object> v = (Vector<Object>)getObjectClasse();
-		ReponseEBOOP rep = new ReponseEBOOP();
-		Requete_card req_card = new Requete_card((int)v.get(0), (String)v.get(1));
-		ObjectOutputStream oos = new ObjectOutputStream(s_card.getOutputStream());
-		oos.writeObject(req_card); 
-		oos.flush();
-		System.out.println("Requete envoyée au serveur card!");
-		ObjectInputStream ois = new ObjectInputStream(s_card.getInputStream());
-		Reponse_card rep_card = (Reponse_card)ois.readObject();
-		rep.setObjectClasse(rep_card.getType());
-		rep.EnvoieReponse(s);
-		System.out.println("Requete envoyée au servlet " + (int)rep.getObjectClasse());
-	}
+    public void paiement_serveur_carte(Socket s, Socket s_card,Statement instruct) throws IOException, ClassNotFoundException{
+            Vector<Object> v = (Vector<Object>)getObjectClasse();
+            ReponseEBOOP rep = new ReponseEBOOP();
+            Requete_card req_card = new Requete_card((int)v.get(0), (String)v.get(1));
+            ObjectOutputStream oos = new ObjectOutputStream(s_card.getOutputStream());
+            oos.writeObject(req_card); 
+            oos.flush();
+            System.out.println("Requete envoyée au serveur card!");
+            ObjectInputStream ois = new ObjectInputStream(s_card.getInputStream());
+            Reponse_card rep_card = (Reponse_card)ois.readObject();
+            rep.setObjectClasse(rep_card.getType());
+            rep.EnvoieReponse(s);
+            System.out.println("Requete envoyée au servlet " + (int)rep.getObjectClasse());
+    }
+
+    public void payement_res(Socket s, Statement instruct)throws SQLException, IOException{
+            Vector<Reservation> vect_res = (Vector<Reservation>)getObjectClasse();
+            for(int i = 0; i < vect_res.size(); i++){
+                    vect_res.get(i).payement_reservation(instruct);
+            }
+
+    }
+
+
+    public void annuler_reservation(Socket s, Statement instruct) throws SQLException, IOException{
+            ReponseEBOOP rep = new ReponseEBOOP();
+            Vector<Reservation> vect_res = (Vector<Reservation>)getObjectClasse();
+            for(int i=0;i<vect_res.size(); i++){
+                    vect_res.get(i).supprimer_reservation_db(instruct);
+            }
+            vect_res.removeAllElements();
+            rep.setTypeRequete(ReponseEBOOP.ANNULER_ACK);
+            rep.setObjectClasse(null);
+            rep.EnvoieReponse(s);
+    }
 	
-	public void payement_res(Socket s, Statement instruct)throws SQLException, IOException{
-		Vector<Reservation> vect_res = (Vector<Reservation>)getObjectClasse();
-		for(int i = 0; i < vect_res.size(); i++){
-			vect_res.get(i).payement_reservation(instruct);
-		}
-		
-	}
-	
-	public void annuler_reservation(Socket s, Statement instruct) throws SQLException, IOException{
-		ReponseEBOOP rep = new ReponseEBOOP();
-		Vector<Reservation> vect_res = (Vector<Reservation>)getObjectClasse();
-		for(int i=0;i<vect_res.size(); i++){
-			vect_res.get(i).supprimer_reservation_db(instruct);
-		}
-		vect_res.removeAllElements();
-		rep.setTypeRequete(ReponseEBOOP.ANNULER_ACK);
-		rep.setObjectClasse(null);
-		rep.EnvoieReponse(s);
-	}
-	
+    public void creation_facture (Socket s, Statement instruct) throws SQLException, IOException
+    {        
+        Facture fact = (Facture)getObjectClasse();
+        int id_facture = fact.hashCode();
+        fact.setId_facture(Integer.toString(id_facture));
+        String Champs = ("'"+ fact.getId_facture()  +"', '" + fact.getMontant() + "','" + fact.getId_client() + "','" +  fact.getNom_client() + "','" + fact.getPrenom_client()+ "','" + fact.getNvr_reservation()+ "'");
+        facility.InsertIntoTable("FACTURES", Champs, instruct);
+    
+        ReponseEBOOP rep = new ReponseEBOOP();
+        rep.setTypeRequete(ReponseEBOOP.MAIL_AGENT);
+        Vector<String> vec_mail= new Vector<String>();
+        vec_mail = database.facily_EBOOP.get_all_agent_mail(instruct);
+        rep.setObjectClasse(vec_mail);
+        rep.EnvoieReponse(s);
+    }
+
+        
 	public void creation_reservation(Socket s, Statement instruct) throws SQLException, IOException{
 		ReponseEBOOP rep = new ReponseEBOOP();		
 		String info = (String)getObjectClasse();

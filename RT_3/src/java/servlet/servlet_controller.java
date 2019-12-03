@@ -4,21 +4,42 @@
  * and open the template in the editor.
  */
 package servlet;
-
 import ClassesEBOOP.Client;
+import ClassesEBOOP.Facture;
 import ClassesEBOOP.Reservation;
 import ClassesEBOOP.Traversee;
 import ProtocolEBOOP.ReponseEBOOP;
 import ProtocolEBOOP.RequeteEBOOP;
+import divers.Config_Applic;
 import static divers.Config_Applic.pathConfig;
 import divers.Persistance_Properties;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -74,7 +95,7 @@ public class servlet_controller extends HttpServlet  {
         } 
     }
     
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, NoSuchAlgorithmException {
         String adresseDistante = "";
         Vector<Traversee> vect_trav_panier = new Vector();
         Vector<Reservation> vect_res_panier = new Vector();
@@ -99,7 +120,7 @@ public class servlet_controller extends HttpServlet  {
                 Hashtable hash = new Hashtable();
                 hash=(Hashtable)rep.getObjectClasse();
                 session.setAttribute("port_id_nom", hash);
-                session.setMaxInactiveInterval(15);
+                session.setMaxInactiveInterval(60*30);
                 session.setAttribute("socket", CSocket);
             }
             
@@ -245,8 +266,35 @@ public class servlet_controller extends HttpServlet  {
                             {
                                     System.out.println("Requete recue du serveur card : paiement ok");
                                     req.setTypeRequete(RequeteEBOOP.PAIEMENT_OK);
-                                    req.setObjectClasse((Vector<Reservation>)session.getAttribute("reservation_pay"));
+                                    Vector<Reservation> vect_res = (Vector<Reservation>)session.getAttribute("reservation_pay");
+                                    
+                                    req.setObjectClasse(vect_res);
                                     req.EnvoieRequete(CSocket);
+                                    
+                                    //le serveur compâgnie va en meme temps créer une facture et renvoyer la liste des adresses email des agents présents dans la base agents
+                                    Facture fact = new Facture((int)session.getAttribute("montant"), (String)session.getAttribute("num_client_pay"),(String)session.getAttribute("nom_client_pay"),(String)session.getAttribute("prenom_client_pay") ,vect_res.size());
+                                    req.setTypeRequete(RequeteEBOOP.FACTURE);
+                                    req.setObjectClasse(fact);
+                                    req.EnvoieRequete(CSocket);
+                                    //recuperer des addresses mails presentes dans la BD
+                                    rep.RecevoirReponse(CSocket);
+                                    Vector<String> vec_mail = new Vector<String>();
+                                    vec_mail = (Vector<String>)rep.getObjectClasse();
+                                    
+                                    for(int j = 0; j<vec_mail.size(); j++)
+                                    {
+                                        System.out.println("mail : " + vec_mail.get(j).toString());
+                                    }
+                                    System.out.println("path = " + Config_Applic.pathFile);
+                                    //creation du fichier représentant la facture
+                                    File fichier =new File(Config_Applic.pathFile);
+                                    fichier.createNewFile();
+                                    try (FileWriter writer = new FileWriter(fichier)) 
+                                    {
+                                        writer.write("MONTANT=" + fact.getMontant()+ "\n" + "ID_CLIENT=" + fact.getId_client()+ "\n" + "PRENOM_CLIENT=" + fact.getPrenom_client()+"\n" + "NOM_CLIENT=" + fact.getNom_client() + "\n" + "NOMBRE_DE_RESERVATION(S)=" + fact.getNvr_reservation()+"\n");
+                                        writer.close();                            
+                                    }
+                                    envoi_mail(vec_mail);
                                     request.getRequestDispatcher("/jsp_confirmation_paye.jsp").forward(request, response);
                             }
                             
@@ -363,10 +411,88 @@ public class servlet_controller extends HttpServlet  {
         }
     }
 	
-	public int random(int high, int low) {
-            return((int)(Math.random() * (high+1-low)) + low);
+    public int random(int high, int low) {
+        return((int)(Math.random() * (high+1-low)) + low);
     }
     
+    
+    public void envoi_mail(Vector<String> vec_mail) throws IOException, NoSuchAlgorithmException
+    {
+        try {
+            Properties prop;
+            Session sess;
+            prop = System.getProperties();
+            
+            prop.put("mail.smtp.host", myProperties.getProperty("host"));
+            prop.put("file.encoding", myProperties.getProperty("charset"));
+            System.out.println("Création d'une session mail");
+            sess = Session.getDefaultInstance(prop, null);
+            System.out.println("Création du message");
+            String exp = ("web_app@"+myProperties.getProperty("host"));
+            String sujet = "Facture + Controle d'intégrité";
+            
+            
+            MimeMessage msg = new MimeMessage(sess);
+            msg.setFrom (new InternetAddress (exp));
+            msg.setSubject(sujet);
+            
+            
+
+            
+            System.out.println("Début construction du multipart");
+            Multipart msgMP = new MimeMultipart();
+            // 1ère composante : le texte d'accompagnement
+            System.out.println("1ère composante(Texte)");
+            MimeBodyPart msgBP = new MimeBodyPart();
+                          
+            String Hash = creation_digest();
+            System.out.println("Hash : "+ Hash);     
+            String texte = "Controle d'intégrité :"+ Hash;
+            
+            msgBP.setText(texte);
+            msgMP.addBodyPart(msgBP);
+            
+            //ajout de la facture en piece jointe
+            msgBP = new MimeBodyPart();
+            DataSource so = new FileDataSource (Config_Applic.pathFile);
+            msgBP.setDataHandler (new DataHandler (so));
+            msgBP.setFileName("facture.properties");
+            msgMP.addBodyPart(msgBP);
+            
+            
+            msg.setContent(msgMP);
+
+            for(int j = 0 ; j< vec_mail.size(); j++ )
+            {
+                System.out.println("Envoi du message");
+                
+                String dest = vec_mail.get(j);
+                msg.setRecipient (Message.RecipientType.TO, new InternetAddress (dest));
+                
+                
+                Transport.send(msg);
+                System.out.println("Message envoyé"); 
+            }
+
+        } catch (MessagingException ex) {
+            Logger.getLogger(servlet_controller.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public String creation_digest() throws IOException, NoSuchAlgorithmException
+    {
+        //Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        // On lit le contenu du fichier :
+        byte[] fileContentBytes = Files.readAllBytes(Paths.get(Config_Applic.pathFile) );
+        // On crée le MessageDigest avec l’algorithme désiré : 
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+        // On calcule le hash :
+        byte[] hash = digest.digest(fileContentBytes ); 
+        // Que l'on encode en base64 (java 8 - sinon il faut une solution tierce)
+        String encoded = Base64.getEncoder().encodeToString(hash);
+        //String encoded = new String(hash);
+        return encoded;
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -380,8 +506,12 @@ public class servlet_controller extends HttpServlet  {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
-		//request.getSession().setMaxInactiveInterval(10);
+        try {
+            processRequest(request, response);
+            //request.getSession().setMaxInactiveInterval(10);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(servlet_controller.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -395,7 +525,11 @@ public class servlet_controller extends HttpServlet  {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(servlet_controller.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

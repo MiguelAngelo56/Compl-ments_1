@@ -41,26 +41,26 @@ public final class jsp_005flogin_jsp extends org.apache.jasper.runtime.HttpJspBa
       _jspx_out = out;
       _jspx_resourceInjector = (org.glassfish.jsp.api.ResourceInjector) application.getAttribute("com.sun.appserv.jsp.resource.injector");
 
-      out.write("\r\n");
-      out.write("\r\n");
-      out.write("\r\n");
-      out.write("<!DOCTYPE html>\r\n");
-      out.write("<html>\r\n");
-      out.write("    <head>\r\n");
-      out.write("        \r\n");
-      out.write("        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\r\n");
-      out.write("        <title>Application Check In  ----   Dos Santos Miguel  ----  Wagemans Damien  ----</title>\r\n");
-      out.write("    </head>\r\n");
-      out.write("    <body>\r\n");
-      out.write("        <h1>Bienvenu dans l'application de réservation pour Ferry</h1>\r\n");
-      out.write("        <h3>Authentification</h3>\r\n");
-      out.write("        <form name=\"login\" action=\"servlet_controller\">\r\n");
-      out.write("            Numero du client : <input type=\"text\" name=\"num_client\" value=\"\" />\r\n");
-      out.write("            <input type=\"submit\" value=\"Login\" name=\"action\" />       \r\n");
-      out.write("            \r\n");
-      out.write("        </form>\r\n");
-      out.write("    </body>\r\n");
-      out.write("</html>\r\n");
+      out.write("\n");
+      out.write("\n");
+      out.write("\n");
+      out.write("<!DOCTYPE html>\n");
+      out.write("<html>\n");
+      out.write("    <head>\n");
+      out.write("        \n");
+      out.write("        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
+      out.write("        <title>Application Check In  ----   Dos Santos Miguel  ----  Wagemans Damien  ----</title>\n");
+      out.write("    </head>\n");
+      out.write("    <body>\n");
+      out.write("        <h1>Bienvenu dans l'application de réservation pour Ferry</h1>\n");
+      out.write("        <h3>Authentification</h3>\n");
+      out.write("        <form name=\"login\" action=\"servlet_controller\">\n");
+      out.write("            Numero du client : <input type=\"text\" name=\"num_client\" value=\"\" />\n");
+      out.write("            <input type=\"submit\" value=\"Login\" name=\"action\" />       \n");
+      out.write("            \n");
+      out.write("        </form>\n");
+      out.write("    </body>\n");
+      out.write("</html>\n");
     } catch (Throwable t) {
       if (!(t instanceof SkipPageException)){
         out = _jspx_out;

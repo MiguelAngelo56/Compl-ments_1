@@ -151,5 +151,15 @@ public class facily_EBOOP extends facility{
         }
         return hash;
     }
-    
+    public static Vector<String> get_all_agent_mail(Statement instruc) throws SQLException
+    {
+        ResultSet rs;
+        rs = instruc.executeQuery("Select * from AGENTS");
+        Vector<String> vec_mail = new Vector<String>();
+        while(rs.next())
+        {
+            vec_mail.add(rs.getString("EMAIL"));
+        }
+        return vec_mail;
+    }
 }

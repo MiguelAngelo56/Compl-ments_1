@@ -15,6 +15,7 @@
     </head>
     <body>
         <h1>Votre payement confirmé</h1>
+                    <% request.getSession().setAttribute("OK", 1);%>
                     <%if(request.getSession().getAttribute("reservation_pay")!= null)
                     {
                             Vector<Reservation> vec_res = (Vector<Reservation>) request.getSession().getAttribute("reservation_pay");
