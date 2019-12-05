@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -132,7 +133,7 @@ public class ThreadClient extends Thread{
                         reply = InternetAddress.toString(msg[MessageNumber].getRecipients(Message.RecipientType.TO));
                         System.out.println("3");        
                         //mail (expediateur, destinataire, sujet, texte)
-                        Mail mail = new Mail(reply,a.getMail(),(String)msg[MessageNumber].getSubject(), Text, null);
+                        Mail mail = new Mail(Arrays.toString(msg[i].getFrom()),a.getMail(),(String)msg[MessageNumber].getSubject(), Text);
                         req.setObjectClasse(mail);
                         req.EnvoieRequete(Sock);
                     }

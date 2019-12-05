@@ -83,9 +83,9 @@ public class ThreadServeur extends Thread{
             //Connexion à la base de donnée
             System.out.println("Essai de connexion JDBC");
             Class leDriver= Class.forName("oracle.jdbc.driver.OracleDriver");
-            Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/ORCL","BD_FERRIES","Damien");
+            //Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/ORCL","BD_FERRIES","Damien");
             //Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","RTI","unizuniz1999");
-            //Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","RTI2","unizuniz1999");
+            Connection con= DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","RTI2","unizuniz1999");
             con.setAutoCommit(false);
             System.out.println("Connexion à la BDD RTI réalisée");
             instruc= con.createStatement();

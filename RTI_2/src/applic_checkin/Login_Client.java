@@ -67,7 +67,7 @@ public class Login_Client extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Erreur de connectivité lors du ping", "Ping error", JOptionPane.ERROR_MESSAGE);
         }
         
-        SNMP.SNMP_utility.SNMP_GET_synchrone("127.0.0.1/161", ".1.3.6.1.2.1.1.5", "2326DSMDW");
+        //SNMP.SNMP_utility.SNMP_GET_synchrone("127.0.0.1/161", ".1.3.6.1.2.1.1.5", "2326DSMDW");
         
         
  

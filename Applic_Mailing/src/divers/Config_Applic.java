@@ -10,6 +10,7 @@ package divers;
     public static String sep = System.getProperty("file.separator");
     public static String pathConfig = (rep + sep + "file" + sep + "config.properties");
     public static String pathLogin = (rep + sep + "file" + sep + "login.properties");
+    public static String pathLog = (rep + sep + "file" + sep + "log.txt");
     // cheminconfig = /Users/damien/Dropbox/Java_Salle_Presse/file/config.properties
     //ceci sera valable en fonctio de l'os utilisé grace aux "system.getProperty"
     

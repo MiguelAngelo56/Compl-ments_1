@@ -8,14 +8,20 @@ package applic_mailing;
 import ClassesMail.Agent;
 import ClassesMail.Mail;
 import static divers.Config_Applic.pathConfig;
+import static divers.Config_Applic.pathLog;
+import divers.FichierLog;
 import divers.Persistance_Properties;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Folder;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -118,10 +124,18 @@ public class Recevoir_Mail extends javax.swing.JFrame {
                         vect_part.add(p);
                     }
                 }
-                tm.addRow(new Object[]{agent_connecter.getMail(), InternetAddress.toString(msg[i].getRecipients(Message.RecipientType.TO)), msg[i].getSubject(), Text_Part, "true"});
+                tm.addRow(new Object[]{Arrays.toString(msg[i].getFrom()), agent_connecter.getMail(),msg[i].getSubject(), Text_Part, "true"});
             }
+            Enumeration e = msg[i].getAllHeaders();
+            Header h = (Header)e.nextElement();
+            while(e.hasMoreElements()){
+                FichierLog.Ecrire(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + "//" + h.getName() + "//" + h.getValue(), pathLog);
+                h = (Header)e.nextElement();
+                System.out.println(h.getName());
+            }
+            FichierLog.Ecrire("-----------------------------------------------------------------------------------------------------", pathLog);
             System.out.println(vect_part.size());
-            Mail m = new Mail(agent_connecter.getMail(), InternetAddress.toString(msg[i].getRecipients(Message.RecipientType.TO)), msg[i].getSubject(),Text_Part, vect_part);
+            Mail m = new Mail(Arrays.toString(msg[i].getFrom()), agent_connecter.getMail(), msg[i].getSubject(),Text_Part, vect_part);
             vect_mail.add(m);
         }
     }
@@ -143,7 +157,6 @@ public class Recevoir_Mail extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
 
@@ -181,13 +194,6 @@ public class Recevoir_Mail extends javax.swing.JFrame {
 
         jLabel5.setText("jLabel5");
 
-        jButton1.setText("Refresh");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
         jButton2.setText("Disconnect");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -222,12 +228,9 @@ public class Recevoir_Mail extends javax.swing.JFrame {
                                 .addComponent(jLabel1))))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jButton1)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jButton3)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(jButton2)
-                            .addGap(14, 14, 14))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton2))
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(40, Short.MAX_VALUE))
         );
@@ -249,7 +252,6 @@ public class Recevoir_Mail extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
                     .addComponent(jButton2)
                     .addComponent(jButton3))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -271,24 +273,6 @@ public class Recevoir_Mail extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            // TODO add your handling code here:
-            f.close(false);
-            f.open(Folder.READ_ONLY);
-            vect_mail.removeAllElements();
-            for(int i = 0; i < tm.getRowCount(); i++){
-                tm.removeRow(i);
-            }
-            RemplirMessage();
-            //tm.addRow(vect_mail);
-        } catch (MessagingException ex) {
-            Logger.getLogger(Recevoir_Mail.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Recevoir_Mail.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         this.dispose();
@@ -302,6 +286,7 @@ public class Recevoir_Mail extends javax.swing.JFrame {
         mdd.setMail(m);
         mdd.setParamMail();
         mdd.show();
+        
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -343,7 +328,6 @@ public class Recevoir_Mail extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable TableauMail;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
