@@ -1,0 +1,12 @@
+RTI_2/build
+RT_3/build
+Applic_Mailing/build
+Applic_Mailing/.DS_Store
+	Applic_Mailing/file/.DS_Store
+	RTI_2/.DS_Store
+	RTI_2/ServiceMailing/.DS_Store
+	RTI_2/dist/RTI_2_SERVEUR_COMPAGNIE_COMPLEMENT.jar
+	RTI_2/dist/lib/snmp4j-2.8.0.jar
+	RTI_2/file/.DS_Store
+	RT_3/.DS_Store
+	RT_3/file/.DS_Store
